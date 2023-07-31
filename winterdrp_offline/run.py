@@ -15,7 +15,13 @@ from utils import get_imagelist_from_directory, copy_files_to_directory, write_m
 if __name__ == "__main__":
     ########### User-specifiable options ##############
     night = "20230726"
-    base_dir = f"/Users/viraj/winter_data/winter/{night}/"
+    base_dir = f"/Users/viraj/winter_data/winter/{night}/" # base directory
+                                                           # where the raw data is stored
+    unpack_dir = os.path.join(base_dir,
+                              "raw_unpacked")  # directory where the unpacked
+                                               # raw images are stored
+    obslog_file = os.path.join(base_dir, f"observation_log_{night}.csv")
+    # path to the observation log file obtained from the winter server.
 
     save_dark_sub = True  # Set to True if you want to save the dark-subtracted images
     skip_making_cals = False  # Set to True if you have already made
@@ -34,9 +40,6 @@ if __name__ == "__main__":
 
     astrometry_type = "astrometry_net"
     bkg_sub_type = "sextractor"
-    unpack_dir = os.path.join(base_dir,
-                              "raw_unpacked")  # directory where the unpacked
-                                               # raw images are stored
 
     ############################### END OF USER-SPECIFIABLE OPTIONS ###################
 
@@ -49,7 +52,7 @@ if __name__ == "__main__":
     astrom_anet_sex = os.path.join(os.path.dirname(__file__), "config/astrom_anet.sex")
     swarp_config = os.path.join(os.path.dirname(__file__), "config/config.swarp")
 
-    obs_log = ascii.read(os.path.join(base_dir, f"observation_log_{night}.csv"))
+    obs_log = ascii.read(obslog_file)
     t_sunset = Time('2023-07-14T04:00:00') # only use dark images after sunset
 
     steps_to_perform = all_steps[all_steps.index(start_step):]
