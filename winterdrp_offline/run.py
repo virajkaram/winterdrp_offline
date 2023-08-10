@@ -14,7 +14,7 @@ from utils import get_imagelist_from_directory, copy_files_to_directory, write_m
 
 if __name__ == "__main__":
     ########### User-specifiable options ##############
-    night = "20230726"
+    night = "20230716"
     base_dir = f"/Users/viraj/winter_data/winter/{night}/" # base directory
                                                            # where the raw data is stored
     unpack_dir = os.path.join(base_dir,
@@ -24,17 +24,17 @@ if __name__ == "__main__":
     # path to the observation log file obtained from the winter server.
 
     save_dark_sub = True  # Set to True if you want to save the dark-subtracted images
-    skip_making_cals = False  # Set to True if you have already made
+    skip_making_cals = True  # Set to True if you have already made
     # the masterdark  and masterflat
     subids_to_reduce = ["0_0"]  # a combination of 0_0 and 0_1
 
-    start_step = "detrend"
-    all_steps = ["detrend"]  # subset of ["detrend", "astrometry", "stack"]
+    start_step = "astrometry"
+    all_steps = ["astrometry"]  # subset of ["detrend", "astrometry", "stack"]
 
     exptime = 120.0
     board_id = 4
     filter = "J"
-    fieldid = 3944  # field of the science observation that is being reduced.
+    fieldid = 7443  # field of the science observation that is being reduced.
 
     flat_exptime = 120  # exptime of the images to use for flat-fielding
 
@@ -201,6 +201,8 @@ if __name__ == "__main__":
             skysub_list = get_imagelist_from_directory(astrometry_dir + '/' +
                                                        field_dir_base_name,
                                                        select_type="*.bkgsub.fits")
+            print(f"Found {len(skysub_list)} images to solve in "
+                  f"{astrometry_dir + '/' + field_dir_base_name}")
             skysub_mask_list = write_mask(skysub_list)
 
             if astrometry_type == "astrometry_net":
