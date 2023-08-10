@@ -43,7 +43,7 @@ def make_gaia_catalog(ra, dec, tmcatname, catalog_box_size_arcmin, catalog_min_m
     # 'epoch_photometry_url', 'original_ext_source_id', 'designation_2'])
     t.remove_columns(
         ['designation', 'phot_variable_flag', 'datalink_url', 'original_ext_source_id',
-         'DESIGNATION'])
+         'DESIGNATION', 'epoch_photometry_url'])
     t['ph_qual'] = t['ph_qual'].astype(str)
     t['ra_errdeg'] = t['ra_error'] / 3.6e6
     t['dec_errdeg'] = t['dec_error'] / 3.6e6
