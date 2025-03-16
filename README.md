@@ -8,7 +8,7 @@ pip install -e .
 ```
 
 # Usage 
-See [winterdrp_offline/notebooks/example.ipynb](winterdrp_offline/notebooks/example.ipynb) for an example of usage.
+See [notebooks/example.ipynb](winterdrp_offline/notebooks/example.ipynb) for an example of usage.
 
 You will nees the following packages - 
 Required : 
