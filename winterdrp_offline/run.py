@@ -5,16 +5,16 @@ from astrometry import run_astrometry_net
 from stack import run_swarp
 from pathlib import Path
 from sextractor import run_sextractor, mask_sextractor_skysub_pixels, subtract_sky
-from scamp import make_gaia_catalog, run_scamp_command, run_scamp
+from scamp import get_tmass_gaia_catalog, run_scamp_command, run_scamp
 from astropy.io import fits
 import numpy as np
-from utils import get_imagelist_from_directory, copy_files_to_directory, write_mask, \
+from utils import get_imagelist_from_directory, copy_files_to_directory, write_weight_images, \
     combine_images, subtract_dark
 
 
 if __name__ == "__main__":
     ########### User-specifiable options ##############
-    night = "20230716"
+    night = "20230727"
     base_dir = f"/Users/viraj/winter_data/winter/{night}/" # base directory
                                                            # where the raw data is stored
     unpack_dir = os.path.join(base_dir,
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     exptime = 120.0
     board_id = 4
     filter = "J"
-    fieldid = 7443  # field of the science observation that is being reduced.
+    fieldid = 11978  # field of the science observation that is being reduced.
 
     flat_exptime = 120  # exptime of the images to use for flat-fielding
 
@@ -183,7 +183,7 @@ if __name__ == "__main__":
 
             # Subtract background
             if bkg_sub_type == 'sextractor':
-                detrend_mask_list = write_mask(detrend_namelist)
+                detrend_mask_list = write_weight_images(detrend_namelist)
                 skysub_list = []
                 for ind, imgname in enumerate(detrend_namelist):
                     run_sextractor(imgname, weightimg=detrend_mask_list[ind])
@@ -203,7 +203,7 @@ if __name__ == "__main__":
                                                        select_type="*.bkgsub.fits")
             print(f"Found {len(skysub_list)} images to solve in "
                   f"{astrometry_dir + '/' + field_dir_base_name}")
-            skysub_mask_list = write_mask(skysub_list)
+            skysub_mask_list = write_weight_images(skysub_list)
 
             if astrometry_type == "astrometry_net":
                 solved_images, failed_images \
@@ -228,11 +228,11 @@ if __name__ == "__main__":
 
                     h = fits.getheader(imgname)
                     ra, dec = h['CRVAL1'], h['CRVAL2']
-                    make_gaia_catalog(ra=ra, dec=dec,
-                                      tmcatname=imgname.replace(".fits", ".gaia"),
-                                      catalog_box_size_arcmin=15,
-                                      catalog_min_mag=7,
-                                      catalog_max_mag=20)
+                    get_tmass_gaia_catalog(ra=ra, dec=dec,
+                                           tmcatname=imgname.replace(".fits", ".gaia"),
+                                           catalog_box_size_arcmin=15,
+                                           catalog_min_mag=7,
+                                           catalog_max_mag=20)
 
                     print('Downloaded gaia sources')
                     run_scamp_command(imgname)
@@ -248,7 +248,7 @@ if __name__ == "__main__":
                                                          f'/{field_dir_base_name}',
                                                          select_type=
                                                          "*scampastrom.fits")
-            solved_mask_paths = write_mask(solved_images)
+            solved_mask_paths = write_weight_images(solved_images)
             run_swarp(solved_images,
                       solved_mask_paths,
                       swarp_config_path=swarp_config,

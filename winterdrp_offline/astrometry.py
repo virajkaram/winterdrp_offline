@@ -9,6 +9,24 @@ from typing import Optional
 from astropy.io import fits
 
 
+def get_astrometry_header_from_scamped_file(non_astrometry_filename, astrometry_filename=None):
+    """
+    Function to assign astrometry header to a file. By default, it will look for an
+    image with the same name in the post_scamp subdirectory.
+    :param non_astrometry_filename:
+    :param astrometry_filename:
+    :return:
+    """
+    if astrometry_filename is None:
+        cur_subdir_name = non_astrometry_filename.split('/')[-2]
+        astrometry_filename = non_astrometry_filename.replace(cur_subdir_name, 'post_scamp')
+    # load the astrometry header
+    with fits.open(astrometry_filename) as hdul:
+        astrometry_header = hdul[0].header
+    # load the non-astrometry header
+    return astrometry_header
+
+
 def run_astrometry_net(imagelist: str | list, output_dir: str,
                        masklist: str | list = None,
                        *args, **kwargs):

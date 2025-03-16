@@ -1,18 +1,17 @@
 from astroquery.gaia import Gaia
 import os
-from winter_utils.ldactools import save_table_as_ldac
-from sextractor import run_sextractor
+from winterdrp_offline.utils import save_table_as_ldac, write_weight_images
+from winterdrp_offline.sextractor import run_sextractor
 import subprocess
 from pathlib import Path
 from astropy.io import fits
 import numpy as np
-from utils import write_mask
 
 astrom_scamp = Path(__file__).parent.joinpath("config/astrom.scamp")
 
 
-def make_gaia_catalog(ra, dec, tmcatname, catalog_box_size_arcmin, catalog_min_mag,
-                      catalog_max_mag, writeldac=True, write_regions=True):
+def get_tmass_gaia_catalog(ra, dec, tmcatname, catalog_box_size_arcmin, catalog_min_mag,
+                           catalog_max_mag, writeldac=True, write_regions=True):
     print(
         "SELECT * FROM gaiadr2.gaia_source AS g, gaiadr2.tmass_best_neighbour AS "
         "tbest, gaiadr1.tmass_original_valid AS tmass WHERE g.source_id = "
@@ -60,13 +59,29 @@ def make_gaia_catalog(ra, dec, tmcatname, catalog_box_size_arcmin, catalog_min_m
             for i in range(len(t)):
                 f.write("circle(%.7f,%.7f,%.7f) # color=red\n" % (
                     t['ra'][i], t['dec'][i], 0.0005))
+    return t
+
+
+def get_tmass_gaia_catalog_for_image(filename, write_catalog:bool = True, write_regions:bool = True):
+    header = fits.getheader(filename)
+    ra = header['CRVAL1']
+    dec = header['CRVAL2']
+    tmcatname = filename.replace('.fits', '.tmass.cat')
+    catalog_box_size_arcmin = 15
+    catalog_min_mag = 7
+    catalog_max_mag = 20
+
+    t = get_tmass_gaia_catalog(ra, dec, tmcatname, catalog_box_size_arcmin,
+                                catalog_min_mag, catalog_max_mag, writeldac=write_catalog,
+                                write_regions=write_regions)
+    return t
 
 
 def run_scamp(filelist: list | str, output_dir: str, write_file: bool = True):
     if isinstance(filelist, str):
         filelist = [filelist]
 
-    masklist = write_mask(filelist)
+    masklist = write_weight_images(filelist)
     catnames = []
     for ind, file in enumerate(filelist):
         run_sextractor(file, weightimg=masklist[ind])
@@ -82,11 +97,11 @@ def run_scamp(filelist: list | str, output_dir: str, write_file: bool = True):
     center_ra = np.median(center_ras)
     center_dec = np.median(center_decs)
 
-    make_gaia_catalog(ra=center_ra, dec=center_dec,
-                      tmcatname=output_dir + '/gaia.cat',
-                      catalog_box_size_arcmin=15,
-                      catalog_min_mag=7,
-                      catalog_max_mag=20)
+    get_tmass_gaia_catalog(ra=center_ra, dec=center_dec,
+                           tmcatname=output_dir + '/gaia.cat',
+                           catalog_box_size_arcmin=15,
+                           catalog_min_mag=7,
+                           catalog_max_mag=20)
 
     print('Downloaded gaia sources')
     run_scamp_command(scamp_filename, catalog_name = output_dir + '/gaia.cat')

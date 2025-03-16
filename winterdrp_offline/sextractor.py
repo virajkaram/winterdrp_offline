@@ -1,7 +1,7 @@
 import subprocess
 from pathlib import Path
-from winter_utils.ldactools import get_table_from_ldac, save_table_as_ldac, \
-    convert_table_to_ldac
+from winterdrp_offline.utils import get_table_from_ldac, save_table_as_ldac, \
+    convert_table_to_ldac, write_weight_images
 from astropy.io import fits
 import numpy as np
 
@@ -15,7 +15,14 @@ def run_sextractor(
         imgname: str | Path,
         pixscale: float = 1.12,
         regions: bool = True,
-        weightimg: str = 'weight.fits'
+        weightimg: str = None,
+        config_file: str = astrom_sex,
+        param_file: str = astrom_param,
+        filter_file: str = astrom_filter,
+        nnw_file: str = astrom_nnw,
+        satur_level: float = 60000.0,
+        detect_thresh: float = 3.0,
+        analysis_thresh: float = 3.0,
 ):
     """
     Run sextractor on the proc image file
@@ -32,13 +39,16 @@ def run_sextractor(
     None
 
     """
+    if weightimg is None:
+        weightimg = write_weight_images(imgname)[0]
     image_basepath = imgname.replace('.fits', '')
+    catalog_name = imgname + '.cat'
     try:
-        command = f'sex -c {astrom_sex} {imgname} -CATALOG_NAME {imgname}.cat ' + \
-                  f'-CATALOG_TYPE FITS_LDAC -PARAMETERS_NAME {astrom_param} ' + \
-                  f'-FILTER_NAME {astrom_filter} -STARNNW_NAME {astrom_nnw} ' \
-                  f'-PIXEL_SCALE {pixscale} -DETECT_THRESH 3 -ANALYSIS_THRESH 3 ' \
-                  f'-SATUR_LEVEL 60000 -WEIGHT_TYPE MAP_WEIGHT ' \
+        command = f'sex -c {config_file} {imgname} -CATALOG_NAME {catalog_name} ' + \
+                  f'-CATALOG_TYPE FITS_LDAC -PARAMETERS_NAME {param_file} ' + \
+                  f'-FILTER_NAME {filter_file} -STARNNW_NAME {nnw_file} ' \
+                  f'-PIXEL_SCALE {pixscale} -DETECT_THRESH {detect_thresh} -ANALYSIS_THRESH {analysis_thresh} ' \
+                  f'-SATUR_LEVEL {satur_level} -WEIGHT_TYPE MAP_WEIGHT ' \
                   f'-WEIGHT_IMAGE {weightimg} -CHECKIMAGE_TYPE BACKGROUND,-BACKGROUND '\
                   f'-CHECKIMAGE_NAME {image_basepath}.back.fits,' \
                   f'{image_basepath}.bkgsub.fits'
@@ -73,6 +83,8 @@ def run_sextractor(
                 f.write('CIRCLE(%s,%s,%s) # text={%.2f}\n' % (
                     row['X_IMAGE'], row['Y_IMAGE'], row['FWHM_IMAGE'] / 2,
                     row['FWHM_IMAGE']))
+
+    return catalog_name
 
 
 def mask_sextractor_skysub_pixels(imgname, skysub_name):
