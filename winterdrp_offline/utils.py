@@ -144,6 +144,7 @@ def plot_image(
     y_max=None,
     norm=None,
     return_norm=False,
+        flag_nans=False,
 ):
     """
     Plot an image with plt.imshow, auto-thresholded via sigma_clipped_stats,
@@ -229,6 +230,9 @@ def plot_image(
 
     cbar = plt.colorbar(im, ax=ax)
 
+    if flag_nans:
+        nan_locs = np.where(np.isnan(windowed_data))
+        ax.scatter(nan_locs[1], nan_locs[0], marker='x', color='r')
     # Return the normalization object if requested
     if return_norm:
         return ax, norm
