@@ -144,6 +144,7 @@ def plot_image(
     y_max=None,
     norm=None,
     return_norm=False,
+    title=None,
 ):
     """
     Plot an image with plt.imshow, auto-thresholded via sigma_clipped_stats,
@@ -169,6 +170,8 @@ def plot_image(
         A normalization object to pass to imshow. If None, defaults to a linear normalization.
     return_norm : bool, optional
         If True, return the normalization object. Default is False
+    title : str, optional
+        Title for the plot. Default is None.
     Returns
     -------
     ax : matplotlib.axes.Axes
@@ -228,6 +231,10 @@ def plot_image(
         )
 
     cbar = plt.colorbar(im, ax=ax)
+
+    # Set the title if provided
+    if title is not None:
+        ax.set_title(title)
 
     # Return the normalization object if requested
     if return_norm:

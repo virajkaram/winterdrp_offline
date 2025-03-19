@@ -110,3 +110,35 @@ def merge_channels_into_data(data_8ch):
         out[:, j::2, (3 - i) % 4 :: 4] = data_8ch[i]
 
     return out
+
+
+def package_image_list_into_mef(imglist: list, output_mef: str):
+    """
+    Function to package a list of images into a multi-extension fits file
+    :param imglist:
+    :param output_mef:
+    :return:
+    """
+    data_list = []
+    for imgname in imglist:
+        with fits.open(imgname) as hdul:
+            data = hdul[0].data
+            data_list.append(data)
+
+    data_array = np.array(data_list)
+    hdu = fits.PrimaryHDU(data_array)
+    hdu.writeto(output_mef, overwrite=True)
+    return output_mef
+
+
+def package_image_data_into_mef(data_list: list, output_mef: str):
+    """
+    Function to package a list of images into a multi-extension fits file
+    :param data_list:
+    :param output_mef:
+    :return:
+    """
+    data_array = np.array(data_list)
+    hdu = fits.PrimaryHDU(data_array)
+    hdu.writeto(output_mef, overwrite=True)
+    return output_mef
