@@ -13,6 +13,8 @@ setuptools.setup(
         "scipy",
         "matplotlib",
         "astroquery",
+        "pandas",
+        "photutils"
     ],
     # Let setuptools find your package automatically from the current directory
     packages=setuptools.find_packages(),
