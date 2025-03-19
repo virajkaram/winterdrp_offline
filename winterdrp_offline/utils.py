@@ -272,3 +272,40 @@ def get_table_from_ldac(filename: str | Path, frame: int = 1) -> Table:
         frame = frame * 2
     tbl = Table.read(filename, hdu=frame)
     return tbl
+
+
+def write_regions_file(
+    regions_path: str | Path,
+    x_coords: list[float],
+    y_coords: list[float],
+    system: str = "image",
+    region_radius: float = 5,
+    text: list | None = None,
+):
+    """
+    Function to write a regions file
+    Args:
+        regions_path: str, path to regions file
+        x_coords: list, x-coordinates or RA
+        y_coords: list, y-coordinates or Dec
+        system: str, image or wcs
+        region_radius: float, radius of circle
+        text: list, text to accompany the regions file
+
+    Returns:
+
+    """
+    if text is not None:
+        assert len(text) == len(x_coords) == len(y_coords), (
+            "Text must be same size as coordinates, found len(text) = "
+            f"{len(text)}, len(x_coords) = {len(x_coords)}, len(y_coords) = "
+            f"{len(y_coords)}"
+        )
+
+    with open(f"{regions_path}", "w", encoding="utf8") as regions_f:
+        regions_f.write(f"{system}\n")
+        for ind, x in enumerate(x_coords):
+            line = f"CIRCLE({x},{y_coords[ind]},{region_radius})"
+            if text is not None:
+                line += " # text={" + text[ind] + "}"
+            regions_f.write(f"{line}\n")

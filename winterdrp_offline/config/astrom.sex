@@ -41,7 +41,7 @@ WEIGHT_THRESH                   # weight threshold[s] for bad pixels
 
 #------------------------------ Photometry -----------------------------------
 
-PHOT_APERTURES   4.0                                # MAG_APER aperture diameter(s) in pixels
+PHOT_APERTURES   3.0                                # MAG_APER aperture diameter(s) in pixels
 PHOT_FLUXFRAC    0.5        # flux fraction[s] used for FLUX_RADIUS
                                                 #
 PHOT_AUTOPARAMS  1.0,2.0                        # MAG_AUTO parameters: <Kron_fact>,<min_radius>
